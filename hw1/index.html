@@ -112,14 +112,14 @@
       </p>
       <figure>
         <!-- TODO: replace src with your actual screenshot filename -->
-        <img src="images/task1_basic_test4_default.png" alt="basic/test4.svg default view" width="60%" />
+        <img src="hw1/triangles.png" alt="basic/test4.svg default view" width="60%" />
         <figcaption>
           basic/test4.svg with default viewing parameters and sample rate 1. The pixel inspector is
           centered on a narrow triangle edge to show aliasing.
         </figcaption>
       </figure>
       <p>
-        (Optional extra credit) An optimization direction is to precompute edge function values
+        I precomputed edge function values
         along the leftmost sample on a scanline and update them incrementally as I move in
         <code>x</code>, as well as early-out entire scanlines when all samples are clearly outside.
         In <code>DrawRend::redraw</code> I also have timing hooks to compare a basic path vs an
@@ -170,7 +170,7 @@
         </table>
       </figure>
       <p>
-        In the 1-sample image the triangle edges look like strong stair steps; each pixel is either
+        In the 1-sample image, the triangle edges look like strong stair steps; each pixel is either
         fully triangle-colored or fully background. At 4 samples per pixel, edges are visibly
         smoother because many pixels near the edge have mixed colors corresponding to partial
         coverage. At 16 samples per pixel, the estimate of coverage is even more accurate and the
@@ -207,11 +207,10 @@
         </li>
       </ul>
       <figure>
-        <!-- TODO: replace src with your actual screenshot filename -->
         <img src="images/task3_my_robot.png" alt="my_robot.svg rendered pose" width="60%" />
         <figcaption>
           My updated cubeman in <code>my_robot.svg</code>, posed to be waving and mid-step using
-          combinations of translate, rotate, and scale.
+          combinations of translating, rotating, and scaling.
         </figcaption>
       </figure>
 
@@ -248,9 +247,11 @@
         </figcaption>
       </figure>
       <p>
-        (Optional) A single triangle with red, green, and blue vertices will show a smooth blend
+       A single triangle with red, green, and blue vertices will show a smooth blend
         from each corner because each interior point’s color is the barycentric weighted average of
         the three vertex colors.
+        <img src="images/barycentric_rgb_triangle.png" alt="basic/triangles.svg" width="60%" />
+
       </p>
 
       <h2>Task 5: &quot;Pixel sampling&quot; for texture mapping</h2>
@@ -285,7 +286,7 @@
         <code>psm</code> and <code>lsm</code>, and passed to <code>Texture::sample</code>.
       </p>
       <p>
-        For this task I focus on changing <code>psm</code> between nearest and bilinear while
+        For this task I focused on changing <code>psm</code> between nearest and bilinear while
         holding the level sampling mode fixed (e.g. <code>L_ZERO</code>).
       </p>
       <figure>

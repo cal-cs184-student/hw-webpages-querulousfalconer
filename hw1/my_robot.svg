@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 width="500px" height="500px" viewBox="0 0 500 500" xml:space="preserve">
+
+<!-- Cubeman waving and running: body tilted forward, right arm up waving, legs in stride -->
+<g transform="translate(250 250)">
+	<g transform="rotate(-12)">
+		<!-- torso (slightly narrower for a leaner look) -->
+		<g transform="scale(0.9 1)">
+			<polygon fill="#1D3557" points="-50,-50 50,-50 -50,50 "/>
+			<polygon fill="#1D3557" points="-50,50 50,-50 50,50"/>
+		</g>
+
+		<!-- head (slightly larger, friendly yellow) -->
+		<g transform="translate(0 -100)">
+			<g transform="rotate(45)">
+				<g transform="scale(0.58 0.58)">
+					<polygon fill="#E9C46A" points="-50,-50 50,-50 -50,50 "/>
+					<polygon fill="#E9C46A" points="-50,50 50,-50 50,50"/>
+				</g>
+			</g>
+		</g>
+
+		<!-- left leg: forward (running stride) -->
+		<g transform="translate(-40 90) rotate(-28)">
+			<g transform="scale(.2 .6)">
+				<polygon fill="#E63946" points="-50,-50 50,-50 -50,50 "/>
+				<polygon fill="#E63946" points="-50,50 50,-50 50,50"/>
+			</g>
+			<g transform="translate(0 70)">
+				<g transform="scale(.2 .6)">
+					<polygon fill="#E63946" points="-50,-50 50,-50 -50,50 "/>
+					<polygon fill="#E63946" points="-50,50 50,-50 50,50"/>
+				</g>
+			</g>
+		</g>
+
+		<!-- right leg: back (running stride) -->
+		<g transform="translate(40 90) rotate(22)">
+			<g transform="scale(.2 .6)">
+				<polygon fill="#E63946" points="-50,-50 50,-50 -50,50 "/>
+				<polygon fill="#E63946" points="-50,50 50,-50 50,50"/>
+			</g>
+			<g transform="translate(0 70)">
+				<g transform="scale(.2 .6)">
+					<polygon fill="#E63946" points="-50,-50 50,-50 -50,50 "/>
+					<polygon fill="#E63946" points="-50,50 50,-50 50,50"/>
+				</g>
+			</g>
+		</g>
+
+		<!-- left arm: swung back (running) -->
+		<g transform="translate(-90 -40) rotate(32)">
+			<g transform="scale(.6 .2)">
+				<polygon fill="#F4A261" points="-50,-50 50,-50 -50,50 "/>
+				<polygon fill="#F4A261" points="-50,50 50,-50 50,50"/>
+			</g>
+			<g transform="translate(-70 0)">
+				<g transform="scale(.6 .2)">
+					<polygon fill="#F4A261" points="-50,-50 50,-50 -50,50 "/>
+					<polygon fill="#F4A261" points="-50,50 50,-50 50,50"/>
+				</g>
+			</g>
+		</g>
+
+		<!-- right arm: waving (raised and bent) -->
+		<g transform="translate(90 -40) rotate(-82)">
+			<g transform="scale(.6 .2)">
+				<polygon fill="#F4A261" points="-50,-50 50,-50 -50,50 "/>
+				<polygon fill="#F4A261" points="-50,50 50,-50 50,50"/>
+			</g>
+			<g transform="translate(70 0) rotate(-25)">
+				<g transform="scale(.6 .2)">
+					<polygon fill="#E9C46A" points="-50,-50 50,-50 -50,50 "/>
+					<polygon fill="#E9C46A" points="-50,50 50,-50 50,50"/>
+				</g>
+			</g>
+		</g>
+	</g>
+</g>
+</svg>
