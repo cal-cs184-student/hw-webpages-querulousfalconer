@@ -112,14 +112,14 @@
       </p>
       <figure>
         <!-- TODO: replace src with your actual screenshot filename -->
-        <img src="hw1/triangles.png" alt="basic/test4.svg default view" width="60%" />
+        <img src="images/task1_basic_test4_default.png" alt="basic/test4.svg default view" width="60%" />
         <figcaption>
           basic/test4.svg with default viewing parameters and sample rate 1. The pixel inspector is
           centered on a narrow triangle edge to show aliasing.
         </figcaption>
       </figure>
       <p>
-        I precomputed edge function values
+        (Optional extra credit) An optimization direction is to precompute edge function values
         along the leftmost sample on a scanline and update them incrementally as I move in
         <code>x</code>, as well as early-out entire scanlines when all samples are clearly outside.
         In <code>DrawRend::redraw</code> I also have timing hooks to compare a basic path vs an
@@ -148,34 +148,56 @@
         With multiple subsamples, I estimate how much of each pixel is covered and blend accordingly,
         which smooths out high-frequency changes at edges and reduces aliasing.
       </p>
+      <p>
+        Below are screenshots of <code>basic/test4.svg</code> with default viewing parameters and
+        sample rates 1, 4, and 16. The pixel inspector (zoom window) is positioned over the very
+        skinny purple triangle corner near the bottom-right to show the effect of supersampling on
+        thin geometry and jagged edges.
+      </p>
       <figure>
         <table style="width: 100%; text-align: center; border-collapse: collapse">
           <tr>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task2_test4_rate1.png" width="100%" />
+              <img src="images/task2_test4_rate1.png" width="100%" alt="basic/test4.svg, sample rate 1" />
               <figcaption>basic/test4.svg, sample rate 1</figcaption>
             </td>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task2_test4_rate4.png" width="100%" />
+              <img src="images/task2_test4_rate4.png" width="100%" alt="basic/test4.svg, sample rate 4" />
               <figcaption>basic/test4.svg, sample rate 4</figcaption>
             </td>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task2_test4_rate16.png" width="100%" />
+              <img src="images/task2_test4_rate16.png" width="100%" alt="basic/test4.svg, sample rate 16" />
               <figcaption>basic/test4.svg, sample rate 16</figcaption>
             </td>
           </tr>
         </table>
       </figure>
       <p>
-        In the 1-sample image, the triangle edges look like strong stair steps; each pixel is either
-        fully triangle-colored or fully background. At 4 samples per pixel, edges are visibly
-        smoother because many pixels near the edge have mixed colors corresponding to partial
-        coverage. At 16 samples per pixel, the estimate of coverage is even more accurate and the
-        edges appear very smooth at normal viewing scales, at the cost of more computation.
+        <strong>Why these results are observed:</strong> With <strong>sample rate 1</strong>, each
+        pixel has a single sample at its center. The rasterizer makes a binary decision: that
+        sample is either inside or outside the triangle. So each pixel is either fully triangle-colored
+        or fully background, producing strong <em>stair-stepping (aliasing)</em> along edges. The
+        skinny triangle corner is especially jagged because many pixels are only partially covered
+        but get a single yes/no result.
       </p>
+      <p>
+        With <strong>sample rate 4</strong> (a 2×2 grid of subsamples per pixel), we take four
+        point-in-triangle tests per pixel and then average their colors. Pixels that are only partly
+        covered get a blend of triangle color and background according to how many subsamples hit
+        the triangle. That gives a <em>coverage estimate</em> per pixel, so edges look visibly
+        smoother and the skinny corner shows intermediate shades instead of hard steps.
+      </p>
+      <p>
+        With <strong>sample rate 16</strong> (4×4 subsamples per pixel), the coverage estimate is
+        finer. More subsamples near the true edge fall partly inside and partly outside, so the
+        resolved pixel color reflects a more accurate fractional coverage. Edges and the thin
+        corner appear much smoother. The tradeoff is higher cost: 16× more samples per pixel and
+        proportionally more work in rasterization and resolve.
+      </p>
+      <figure>
+        <img src="images/task2_test4_compare.png" alt="Side-by-side: sample rates 1, 4, 16" width="90%" />
+        <figcaption>Side-by-side comparison: basic/test4.svg at sample rates 1, 4, and 16 (pixel inspector on skinny triangle corner).</figcaption>
+      </figure>
 
       <h2>Task 3: Transforms</h2>
       <p>
@@ -206,19 +228,45 @@
           emphasize the motion and make the character stand out.
         </li>
       </ul>
+      <p>
+        <strong>What I was trying to do with cubeman:</strong> I wanted him to look like he’s
+        running toward the viewer while waving hello—a single frozen frame of “hey, I’m coming!”
+        So I leaned his whole body forward with a small rotation, put his right arm up with an
+        extra bend at the elbow for a clear wave, swung his left arm back and left leg forward
+        and right leg back to suggest a mid-stride run. I changed his colors (navy torso, warm
+        yellow head, coral limbs and orange arm with a yellow “hand” on the waving arm) and
+        slightly narrowed the torso and enlarged the head so he reads more as a friendly character
+        in motion rather than a static robot.
+      </p>
       <figure>
         <img src="images/task3_my_robot.png" alt="my_robot.svg rendered pose" width="60%" />
         <figcaption>
           My updated cubeman in <code>my_robot.svg</code>, posed to be waving and mid-step using
-          combinations of translating, rotating, and scaling.
+          combinations of translate, rotate, and scale.
         </figcaption>
       </figure>
 
       <h2>Task 4: Barycentric coordinates</h2>
       <p>
-        Barycentric coordinates describe any point inside a triangle as a weighted combination of
-        the triangle’s three vertices. Given vertices \(A\), \(B\), and \(C\), any point \(P\)
-        inside the triangle can be written as:
+        Barycentric coordinates describe how much each corner of a triangle
+        “contributes” to a point inside it. Instead of using \(x\) and \(y\), points are described 
+         by three weights—one per vertex—that sum to 1. The closer the point is to a vertex,
+        the higher that vertex’s weight; at a vertex, that weight is 1 and the others are 0. That
+        makes it natural to blend vertex attributes (like color) across the triangle: the color at
+        any interior point is just the same weighted mix of the three vertex colors. The image
+        below shows a single triangle with one red, one green, and one blue vertex; the smooth
+        gradient is exactly that barycentric blend.
+      </p>
+      <figure>
+        <img src="images/barycentric_rgb_triangle.png" alt="Single triangle with red, green, and blue vertices; smoothly blended colors from barycentric interpolation." width="50%" />
+        <figcaption>
+          A single triangle with red, green, and blue vertices (sample rate 1). Interior color is
+          the barycentric weighted average of the three vertex colors, producing a smooth blend.
+        </figcaption>
+      </figure>
+      <p>
+        Formally, given vertices \(A\), \(B\), and \(C\), any point \(P\) inside the triangle can
+        be written as:
       </p>
       <p>
         \[
@@ -239,29 +287,30 @@
         coordinates (for texture mapping), simply by taking the corresponding weighted sum.
       </p>
       <figure>
-        <!-- TODO: replace src with your actual screenshot filename -->
         <img src="images/task4_test7_rate1.png" alt="basic/test7.svg" width="60%" />
         <figcaption>
           basic/test7.svg with sample rate 1. Many small color triangles demonstrate how barycentric
           interpolation produces smooth color transitions across each triangle.
         </figcaption>
       </figure>
-      <p>
-       A single triangle with red, green, and blue vertices will show a smooth blend
-        from each corner because each interior point’s color is the barycentric weighted average of
-        the three vertex colors.
-        <img src="images/barycentric_rgb_triangle.png" alt="basic/triangles.svg" width="60%" />
-
-      </p>
 
       <h2>Task 5: &quot;Pixel sampling&quot; for texture mapping</h2>
       <p>
-        Once I know a subsample’s position in screen space and that it lies inside a textured
-        triangle, I use barycentric coordinates to compute the corresponding texture coordinates
-        \((u, v)\). Pixel sampling then answers how to convert fractional \((u, v)\) into a color
-        from the discrete texture grid of texels.
+        <b>Pixel sampling in my own words:</b> The texture is a grid of colored texels, but when we
+        map it onto a triangle we get continuous \((u, v)\) coordinates that usually fall
+        between texel centers. Pixel sampling is the rule we use to turn that fractional \((u, v)\)
+        into a single color. So it’s literally “which texel(s) do we read, and how do we combine
+        them?” Different rules give different tradeoffs between sharpness, smoothness, and cost.
       </p>
-      <p>I implemented two pixel sampling methods:</p>
+      <p>
+        In my pipeline, once a subsample is inside a textured triangle, I use barycentric
+        coordinates to get its \((u, v)\). That plus the current pixel/level sampling mode goes into
+        a <code>SampleParams</code>; <code>Texture::sample</code> then dispatches to the right
+        routine (nearest or bilinear on the chosen mip level). So texture mapping is: interpolate
+        \((u, v)\) per subsample → call pixel sampling to get a color → write that into the
+        sample buffer.
+      </p>
+      <p><b>Two pixel sampling methods:</b></p>
       <ul>
         <li>
           <b>Nearest neighbor (<code>P_NEAREST</code>)</b>: I convert \((u, v)\) into integer texel
@@ -286,60 +335,96 @@
         <code>psm</code> and <code>lsm</code>, and passed to <code>Texture::sample</code>.
       </p>
       <p>
-        For this task I focused on changing <code>psm</code> between nearest and bilinear while
+        For this task I focus on changing <code>psm</code> between nearest and bilinear while
         holding the level sampling mode fixed (e.g. <code>L_ZERO</code>).
       </p>
+      <p>
+        <b>Scene and pixel inspector:</b> I used a texture-mapped scene from
+        <code>svg/texmap/</code>. <code>texmap/test4.svg</code> and <code>texmap/test1.svg</code>
+        both use the parrot texture and are good for comparison. I positioned the pixel
+        inspector (zoom window) over a high-detail region—e.g. the parrot’s feathers or
+        eye—where the texture has fine variation. There, bilinear sampling clearly defeats
+        nearest: nearest shows blocky texels and jagged boundaries, while bilinear gives smooth
+        gradients between texels.
+      </p>
+      <p>
+        <b>How to capture the four screenshots:</b> Run the app from <code>build/</code>, load
+        <code>svg/texmap/test4.svg</code> (or <code>test1.svg</code>), and enable the pixel
+        inspector (zoom). Move the inspector over a detailed part of the parrot (feathers or eye).
+        Use <strong>L</strong> to set level sampling to “level zero” so we only compare pixel
+        sampling. For each of the four combinations, set the mode then press <strong>S</strong>
+        to save (screenshots go to the current working directory, e.g. <code>build/</code>).
+        Copy the four PNGs into <code>docs/images/</code> and rename them as below.
+      </p>
+      <ul>
+        <li>Nearest + 1 sample/pixel: <code>P</code> until “nearest pixel”, <code>-</code> until rate 1 → <code>S</code> → save as <code>task5_nearest_1spp.png</code></li>
+        <li>Nearest + 16 samples/pixel: same pixel mode, <code>=</code> until rate 16 → <code>S</code> → <code>task5_nearest_16spp.png</code></li>
+        <li>Bilinear + 1 sample/pixel: <code>P</code> until “bilinear pixel”, <code>-</code> until rate 1 → <code>S</code> → <code>task5_bilinear_1spp.png</code></li>
+        <li>Bilinear + 16 samples/pixel: bilinear, <code>=</code> until rate 16 → <code>S</code> → <code>task5_bilinear_16spp.png</code></li>
+      </ul>
       <figure>
         <table style="width: 100%; text-align: center; border-collapse: collapse">
           <tr>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task5_nearest_1spp.png" width="100%" />
+              <img src="images/task5_nearest_1spp.png" width="100%" alt="Nearest, 1 sample per pixel" />
               <figcaption>Nearest, 1 sample per pixel</figcaption>
             </td>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task5_nearest_16spp.png" width="100%" />
+              <img src="images/task5_nearest_16spp.png" width="100%" alt="Nearest, 16 samples per pixel" />
               <figcaption>Nearest, 16 samples per pixel</figcaption>
             </td>
           </tr>
           <tr>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task5_bilinear_1spp.png" width="100%" />
+              <img src="images/task5_bilinear_1spp.png" width="100%" alt="Bilinear, 1 sample per pixel" />
               <figcaption>Bilinear, 1 sample per pixel</figcaption>
             </td>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task5_bilinear_16spp.png" width="100%" />
+              <img src="images/task5_bilinear_16spp.png" width="100%" alt="Bilinear, 16 samples per pixel" />
               <figcaption>Bilinear, 16 samples per pixel</figcaption>
             </td>
           </tr>
         </table>
       </figure>
       <p>
-        On a high-frequency texture from <code>svg/texmap</code>, nearest sampling with 1
-        sample/pixel looks very blocky: individual texels and strong aliasing artifacts (moiré,
-        shimmering) are obvious. Nearest with 16 samples/pixel is better because supersampling
-        averages multiple neighbors near edges, but some blockiness remains since each subsample
-        still picks a single texel.
+        <b>Relative differences:</b> On a high-frequency texture from <code>svg/texmap</code>,
+        nearest at 1 sample/pixel looks very blocky—individual texels and strong aliasing
+        (moiré, shimmering) are obvious. Nearest at 16 samples/pixel is better because
+        supersampling averages multiple samples per pixel near edges, but blockiness between
+        texels remains since each subsample still returns a single texel color. Bilinear at 1
+        sample/pixel already looks smoother: sharp jumps at texel boundaries become smooth
+        transitions. Bilinear at 16 samples/pixel combines both: supersampling reduces geometric
+        aliasing and bilinear reduces texture aliasing, so the result is the smoothest of the
+        four.
       </p>
       <p>
-        Bilinear sampling at 1 sample/pixel already looks smoother: sharp jumps between texels are
-        replaced by smooth transitions. Bilinear with 16 samples/pixel combines the benefits of
-        both: supersampling handles geometric aliasing, and bilinear reduces texture aliasing, so
-        the overall result is much smoother and visually pleasing. The difference between nearest
-        and bilinear is largest where the texture has high-frequency details (thin lines, small
-        text) and is minified; there, nearest changes texels abruptly between pixels, while
-        bilinear averages neighboring texels and better respects the sampling theorem.
+        <b>When is the difference between nearest and bilinear large?</b> The gap is biggest when
+        (1) the texture has high spatial frequency (fine details, thin lines, small text) and
+        (2) the texture is minified (one pixel covers many texels) or the sampling rate is low.
+        In that regime, nearest sampling makes the chosen texel jump abruptly from one pixel to
+        the next, so you see blocky boundaries and moiré. Bilinear sampling blends the four
+        neighboring texels, so the color changes smoothly and better respects the sampling
+        theorem. When the texture is magnified (one texel spans many pixels) or when the
+        texture is very smooth, nearest and bilinear look much closer; the benefit of bilinear
+        is most visible in high-detail, minified regions like the parrot’s feathers or eye in
+        <code>texmap/test4.svg</code>.
       </p>
 
       <h2>Task 6: &quot;Level Sampling&quot; with mipmaps for texture mapping</h2>
       <p>
-        Level sampling decides which mipmap level(s) to sample from when a texture is minified or
-        magnified. I estimate the size of the pixel footprint in texture space using derivatives of
-        the texture coordinates with respect to screen space. Specifically, in
-        <code>Texture::get_level</code> I compute:
+        <b>Level sampling in my own words:</b> When we draw a texture onto the screen, each pixel
+        corresponds to some region in texture space—sometimes a tiny patch (magnification), sometimes
+        a large patch (minification). Level sampling is the rule for <em>which mip level</em> we read
+        from: we have a pyramid of prefiltered, downsampled versions of the texture (mipmaps). If we
+        always use the top level (full resolution), we get aliasing when one pixel covers many texels;
+        level sampling uses the screen-space derivatives of \((u,v)\) to estimate that footprint, compute
+        a continuous mip level \(\ell = \log_2 d\), and then either round to one level (L_NEAREST),
+        blend two levels (L_LINEAR), or ignore it and always use level 0 (L_ZERO). So level sampling
+        trades a bit of memory and work for much better antialiasing when the texture is minified.
+      </p>
+      <p>
+        <b>Implementation:</b> I estimate the pixel footprint in texture space using derivatives of
+        \((u,v)\) with respect to screen \(x\) and \(y\). In <code>Texture::get_level</code> I compute:
       </p>
       <p>
         \[
@@ -389,36 +474,41 @@
           aliasing.
         </li>
       </ul>
+      <p>
+        <b>How the four screenshots were made:</b> I use a custom PNG (a photo with curtains, fabrics,
+        and fine detail) in <code>svg/texmap/pexels_test.svg</code> (texture <code>pexels_scene.png</code>).
+        You can run <code>./draw</code> with that SVG, then use <strong>L</strong> to cycle level sampling
+        (L_ZERO, L_NEAREST, L_LINEAR) and <strong>P</strong> for pixel sampling; press <strong>S</strong> to save
+        a screenshot to the current directory. Alternatively, from the repo root run
+        <code>./scripts/render_task6_screenshots.sh</code> to render all four combinations headlessly and
+        copy them into <code>docs/images/</code>.
+      </p>
       <figure>
         <table style="width: 100%; text-align: center; border-collapse: collapse">
           <tr>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task6_L0_Pnearest.png" width="100%" />
+              <img src="images/task6_L0_Pnearest.png" width="100%" alt="L_ZERO + P_NEAREST" />
               <figcaption>L_ZERO + P_NEAREST</figcaption>
             </td>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task6_L0_Plinear.png" width="100%" />
+              <img src="images/task6_L0_Plinear.png" width="100%" alt="L_ZERO + P_LINEAR" />
               <figcaption>L_ZERO + P_LINEAR</figcaption>
             </td>
           </tr>
           <tr>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task6_Lnearest_Pnearest.png" width="100%" />
+              <img src="images/task6_Lnearest_Pnearest.png" width="100%" alt="L_NEAREST + P_NEAREST" />
               <figcaption>L_NEAREST + P_NEAREST</figcaption>
             </td>
             <td>
-              <!-- TODO: replace src with your actual screenshot filename -->
-              <img src="images/task6_Lnearest_Plinear.png" width="100%" />
+              <img src="images/task6_Lnearest_Plinear.png" width="100%" alt="L_NEAREST + P_LINEAR" />
               <figcaption>L_NEAREST + P_LINEAR</figcaption>
             </td>
           </tr>
         </table>
       </figure>
       <p>
-        Using a custom PNG plugged into a texmap SVG, <code>L_ZERO + P_NEAREST</code> is the
+        Using the custom PNG in <code>pexels_test.svg</code>, <code>L_ZERO + P_NEAREST</code> is the
         fastest but has strong aliasing when the texture is minified: patterns shimmer and exhibit
         moiré. <code>L_ZERO + P_LINEAR</code> smooths texel boundaries but still aliases when there
         is a lot of minification.
@@ -434,138 +524,41 @@
 
       <h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
       <p>
-        (Optional) For extra credit, one could design a more complex SVG scene, save it as
-        <code>competition.svg</code> in <code>docs/</code>, and render it at 800x800 resolution. A
-        natural idea is to procedurally generate a composition of triangles and textured quads using
-        a small script (for example, creating spirals, tiled patterns, or stylized landscapes), then
-        feed that SVG through the same rasterization pipeline to showcase both geometric and texture
-        antialiasing.
+        I saved my best SVG as <code>competition.svg</code> in <code>docs/</code> and rendered it
+        at 800×800 using the homework rasterizer (<code>./draw docs/competition.svg</code>, then
+        <strong>S</strong> to save a screenshot). Below is the 800×800 PNG screenshot shown in the
+        write-up.
+      </p>
+      <figure>
+        <img src="images/competition.svg" width="800" height="800" alt="competition.svg rendered at 800×800" />
+        <figcaption>800×800 screenshot of <code>docs/competition.svg</code></figcaption>
+      </figure>
+      <h3>How I did it</h3>
+      <p>
+        I wrote a Python script in <code>src/generate_competition_svg.py</code> that procedurally
+        generates the SVG. The script outputs only elements the rasterizer supports: solid
+        <code>&lt;polygon&gt;</code> triangles, a <code>&lt;texture&gt;</code> declaration, and
+        <code>&lt;textri&gt;</code> textured triangles (no paths or curves).
+      </p>
+      <p>
+        <strong>What the script generates:</strong> An 800×800 scene with (1) a two-tone sky
+        gradient (four large triangles); (2) concentric spiral arms—several rings of 24 wedge
+        triangles each, with radius and angle parameterized by <code>t</code> in [0,1] and colors
+        cycling per arm to stress geometric (edge) antialiasing; (3) a tiled diamond pattern—a grid
+        of small diamonds (each diamond is four triangles around a center), with alternating row
+        offset and color shade varying by cell; (4) three textured quads (each quad as two
+        <code>&lt;textri&gt;</code> elements) using different UV regions of the same texture to
+        show texture antialiasing; (5) layered hill polygons and a few foreground accent triangles.
+      </p>
+      <p>
+        <strong>How to run it:</strong> From the repo root, run
+        <code>python3 src/generate_competition_svg.py</code>. It writes <code>docs/competition.svg</code>.
+        Then open that SVG in the rasterizer (e.g. <code>./draw docs/competition.svg</code>), set
+        resolution to 800×800 if needed, and press <strong>S</strong> to save the PNG screenshot;
+        place that PNG in <code>hw1/images/competition_800x800.png</code> so this write-up can
+        display it.
       </p>
 
-      <h2>Additional Notes</h2>
-      <ul>
-        <li>You can add inline code as <code>code code code</code>.</li>
-        <li>
-          If you'd like to add math equations,
-          <ul>
-            <li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-            <li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-  </body>
-</html>
-
-<html>
-	<head>
-		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-		<style>
-			h1 {
-				text-align: center;
-			}
-
-			.container {
-				margin: 0 auto;
-				padding: 60px 20%;
-			}
-
-			figure {
-				text-align: center;
-			}
-
-			img {
-				display: inline-block;
-			}
-
-			body {
-				font-family: 'Inter', sans-serif;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
-
-		<br>
-
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		
-		<br>
-
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-
-		<figure>
-			<img src="images/image1.png" alt="Lion" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
-		<!--
-		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
-
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
-
-		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="images/image1.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="images/image2.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="images/image3.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="images/image4.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
-		
-		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 3: Transforms</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
 		</div>
 	</body>
 </html>
