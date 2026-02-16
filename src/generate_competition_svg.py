@@ -81,27 +81,24 @@ def main() -> None:
         "",
         "  <!-- Tiled diamond pattern -->",
     ])
-    diamond_size = 12.6
+    half = 12.6  # half-cell size
+    step = 28.0  # grid step
+    start = 14.0  # first center
     diamond_colors = ["#2a314d", "#3e405a", "#524f66"]
-    for row in range(0, int(H / diamond_size) + 2):
-        for col in range(0, int(W / diamond_size) + 2):
-            cx = col * diamond_size + (diamond_size / 2 if row % 2 else 0)
-            cy = row * diamond_size
-            if cx > W + diamond_size or cy > H + diamond_size:
+    row_max = int((H - start) / step) + 2
+    col_max = int((W - start) / step) + 2
+    for row in range(row_max):
+        for col in range(col_max):
+            cx = start + col * step + (step / 2 if row % 2 else 0)
+            cy = start + row * step
+            if cx > W + half or cy > H + half:
                 continue
             color = diamond_colors[(row + col) % 3]
-            d = diamond_size / 2
-            # 4 triangles per diamond (center out to 4 directions)
-            for dx, dy in [(d, 0), (0, d), (-d, 0), (0, -d)]:
-                nx, ny = cx + dx, cy + dy
-                # two vertices for this wedge
-                if abs(dx) > 0.01:
-                    v1 = (cx + dx, cy + d)
-                    v2 = (cx + dx, cy - d)
-                else:
-                    v1 = (cx + d, cy + dy)
-                    v2 = (cx - d, cy + dy)
-                lines.append(polygon(color, [(cx, cy), (v1[0], v1[1]), (v2[0], v2[1])]))
+            # 4 triangles per diamond: center (cx,cy) with points at right, down, left, up
+            lines.append(polygon(color, [(cx, cy), (cx + half, cy), (cx, cy + half)]))
+            lines.append(polygon(color, [(cx, cy), (cx, cy + half), (cx - half, cy)]))
+            lines.append(polygon(color, [(cx, cy), (cx - half, cy), (cx, cy - half)]))
+            lines.append(polygon(color, [(cx, cy), (cx, cy - half), (cx + half, cy)]))
 
     lines.extend([
         "",
