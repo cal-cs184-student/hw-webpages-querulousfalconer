@@ -1,106 +1,502 @@
-<html>
-	<head>
-		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-		<style>
-			h1 {
-				text-align: center;
-			}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    background-color: white;
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+  kbd {
+    color: #121212;
+  }
+  table.data { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  table.data th, table.data td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  table.data th { background: #f5f5f5; }
+</style>
+<title>CS 184 Path Tracer</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
 
-			.container {
-				margin: 0 auto;
-				padding: 60px 20%;
-			}
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
 
-			figure {
-				text-align: center;
-			}
+</head>
 
-			img {
-				display: inline-block;
-			}
 
-			body {
-				font-family: 'Inter', sans-serif;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-		<h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+<body>
 
-		<br>
+<h1 align="middle">CS 184: Computer Graphics and Imaging</h1>
+<h1 align="middle">Project 3-1: Path Tracer</h1>
+<h2 align="middle">Chris Ha</h2>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		
-		<figure>
-			<img src="cornell.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+<h2 align="middle">Website URL: <a href="https://github.com/cal-cs184-student/hw3-pathtracer-oijio" target="_blank">https://github.com/cal-cs184-student/hw3-pathtracer-oijio</a></h2>
 
-		<!--
-		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
+<p><em>Note:</em> Save all figures below under <kbd>docs/images/</kbd> using the filenames referenced in <kbd>src</kbd> attributes, or update the paths to match your own naming.</p>
 
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
-		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+<ul>
+<li>Keep <kbd>index.html</kbd> as the main report page; use only <em>relative</em> paths (e.g. <kbd>images/foo.png</kbd>).</li>
+<li>On instructional machines, verify paths are case-sensitive (<kbd>.png</kbd> vs <kbd>.PNG</kbd>).</li>
+</ul>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
-		
-		<h2>Part 2: Bounding Volume Hierarchy</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<h2>Part 3: Direct Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+<h2 align="middle">Overview (3 pts)</h2>
+<p>
+  This project implements a Monte Carlo path tracer: primary rays are cast from a pinhole camera through each pixel; intersections against scene geometry (triangles and spheres) are accelerated with a bounding volume hierarchy (BVH). Shading combines emitted light (zero-bounce), direct illumination at the first surface (either uniform hemisphere sampling or importance sampling of area lights), and indirect light from recursive BSDF sampling with Russian roulette termination. Adaptive sampling stops adding pixel samples once a confidence interval on mean brightness falls below a tolerance. Together, these pieces turn a ray caster into a physically motivated renderer that captures soft shadows, color bleeding, and depth of field (when enabled), at the cost of noise that high sample counts and light sampling reduce.
+</p>
+<p>
+  The most interesting takeaway for me was seeing how <em>where</em> you sample (hemisphere vs lights, BSDF vs uniform) dominates both noise and runtime more than small algorithmic tweaks elsewhere. The BVH made large scenes tractable, and adaptive sampling showed that not every pixel needs the same workload.
+</p>
+<br>
 
-		<h2>Part 4: Global Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<h2>Part 5: Adaptive Sampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+<h2 align="middle">Part 1: Ray Generation and Scene Intersection (20 pts)</h2>
 
-		<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
-		</div>
-	</body>
+<p>
+  <strong>Ray generation.</strong> For each pixel sample, the tracer jitters a 2D point inside the pixel and maps it to normalized coordinates $(u,v) \in [0,1]^2$ with the image origin at the bottom-left. <kbd>Camera::generate_ray</kbd> places the sensor on the canonical plane at $z=-1$, sized from the horizontal and vertical fields of view, builds a direction in camera space, transforms it to world space with the camera-to-world matrix <kbd>c2w</kbd>, and emits a ray from the camera position with near/far clip distances <kbd>nClip</kbd> and <kbd>fClip</kbd>.
+</p>
+<p>
+  <strong>Intersection.</strong> The ray is tested against the scene via the BVH. Leaf nodes perform primitive tests: spheres use analytic ray&ndash;sphere intersection; triangles use the M&ouml;ller&ndash;Trumbore test. The closest hit updates an <kbd>Intersection</kbd> record (distance, interpolated normal, BSDF pointer) used for shading.
+</p>
+<br>
+
+<p>
+  We use the M&ouml;ller&ndash;Trumbore formulation. Let $\mathbf{e}_1 = \mathbf{p}_2-\mathbf{p}_1$ and $\mathbf{e}_2 = \mathbf{p}_3-\mathbf{p}_1$ span the triangle plane. The ray is $\mathbf{r}(t)=\mathbf{o}+t\mathbf{d}$. Cross products reuse work so we solve for barycentric coordinates $u,v$ and distance $t$ with few dot products. We reject hits if the ray is parallel to the plane, if $(u,v)$ fall outside the triangle ($u&lt;0$, $v&lt;0$, $u+v&gt;1$), or if $t$ is outside the ray&rsquo;s valid $t$ range. For shading, $w=1-u-v$ and the geometric normal is interpolated as $w\mathbf{n}_1+u\mathbf{n}_2+v\mathbf{n}_3$ for smooth meshes.
+</p>
+<br>
+
+<h3>Show images with normal shading for a few small <kbd>.dae</kbd> files.</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part1_normals_cube.png" align="middle" width="380px" alt="cube normals"/>
+        <figcaption><kbd>dae/simple/cube.dae</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part1_normals_plane.png" align="middle" width="380px" alt="plane normals"/>
+        <figcaption><kbd>dae/simple/plane.dae</kbd></figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part1_normals_cow.png" align="middle" width="380px" alt="cow normals"/>
+        <figcaption><kbd>dae/meshedit/cow.dae</kbd> (or another small mesh)</figcaption>
+      </td>
+      <td>
+        <img src="images/part1_normals_teapot.png" align="middle" width="380px" alt="teapot normals"/>
+        <figcaption><kbd>dae/meshedit/teapot.dae</kbd></figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p><em>Tip:</em> Use your renderer&rsquo;s normal-debug / Part&nbsp;1 visualization mode when exporting these.</p>
+<br>
+
+
+<h2 align="middle">Part 2: Bounding Volume Hierarchy (17 pts)</h2>
+
+<h3>Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.</h3>
+<p>
+  <kbd>BVHAccel::construct_bvh</kbd> recursively partitions a range of primitives. We first compute an axis-aligned bounding box of all primitives in the range. If the count is at most <kbd>max_leaf_size</kbd>, we store a leaf referencing that index range. Otherwise we pick the split axis as the one with the largest extent of that bounding box, sort primitives by the centroid coordinate along that axis, then choose a split index that minimizes a surface-area style cost: for each candidate split between sorted neighbors, we combine the surface areas of the left and right child bounding boxes (prefix/suffix boxes) weighted by the number of primitives on each side, and take the minimum. That is a standard SAH-inspired partition without an explicit intersection cost term. If the best split is degenerate, we fall back to a leaf.
+</p>
+<p>
+  <strong>Traversal.</strong> Stack-based traversal tests the ray against each node&rsquo;s <kbd>BBox</kbd>; leaves test contained primitives and track the closest hit.
+</p>
+<br>
+
+<h3>Show images with normal shading for a few large <kbd>.dae</kbd> files that you can only render with BVH acceleration.</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part2_normals_CBlucy.png" align="middle" width="380px" alt="CBlucy normals"/>
+        <figcaption><kbd>dae/sky/CBlucy.dae</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part2_normals_CBdragon.png" align="middle" width="380px" alt="CBdragon normals"/>
+        <figcaption><kbd>dae/sky/CBdragon.dae</kbd></figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part2_normals_maxplanck.png" align="middle" width="380px" alt="max planck normals"/>
+        <figcaption><kbd>dae/meshedit/maxplanck.dae</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part2_normals_building.png" align="middle" width="380px" alt="building normals"/>
+        <figcaption><kbd>dae/keenan/building.dae</kbd></figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3>Compare rendering times with and without BVH acceleration (one paragraph).</h3>
+ Without a BVH, each ray may test every primitive, so cost scales roughly with rays &times; triangles. With a BVH, average tests per ray drop sharply on large meshes, so wall-clock time falls dramatically while images match; the gap widens as triangle count grows. I tested this on the Lucy and dragon scenes, and saw modest speedups on tiny scenes and very large speedups on Lucy or dragon-scale assets.
+ I also found there was an 20-40% speedup on the building scene, which is a smaller scene but still has a lot of triangles.
+</p>
+<br>
+
+
+<h2 align="middle">Part 3: Direct Illumination (20 pts)</h2>
+
+<h3>Walk through both implementations of the direct lighting function.</h3>
+<p>
+  <strong>Uniform hemisphere (<kbd>estimate_direct_lighting_hemisphere</kbd>).</strong> At the hit point we build an orthonormal frame from the shading normal. We draw directions uniformly over the upper hemisphere in local space, transform to world space, and cast shadow rays. If we hit an emissive BSDF, we accumulate $L_i \, f_r \, \cos\theta_i$ divided by the hemisphere pdf $1/(2\pi)$, averaged over <kbd>ns_area_light</kbd> samples (the starter uses this count for hemisphere samples as well).
+</p>
+<p>
+  <strong>Importance sampling lights (<kbd>estimate_direct_lighting_importance</kbd>).</strong> For each scene light we call <kbd>sample_L</kbd>, which returns an incident direction, distance, and pdf. We trace a shadow ray up to just before the light. If unoccluded, we add $L_i \, f_r \, \cos\theta_i / \mathrm{pdf}$, averaging over multiple samples for area lights and a single sample for delta lights.
+</p>
+<p>
+  The integrator selects between them via <kbd>direct_hemisphere_sample</kbd> (GUI) or <kbd>-H</kbd> in headless mode for hemisphere sampling; otherwise light sampling is used.
+</p>
+<br>
+
+<h3>Show some images rendered with both implementations of the direct lighting function.</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <th>Uniform hemisphere sampling (<kbd>-H</kbd>)</th>
+      <th>Light sampling (default)</th>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part3_hemi_CBspheres.png" align="middle" width="400px" alt="hemisphere CBspheres"/>
+        <figcaption><kbd>dae/sky/CBspheres.dae</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part3_light_CBspheres.png" align="middle" width="400px" alt="light CBspheres"/>
+        <figcaption><kbd>dae/sky/CBspheres.dae</kbd></figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part3_hemi_bunny.png" align="middle" width="400px" alt="hemisphere bunny"/>
+        <figcaption><kbd>dae/sky/bunny.dae</kbd> or <kbd>CBbunny.dae</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part3_light_bunny.png" align="middle" width="400px" alt="light bunny"/>
+        <figcaption>Same scene, light sampling</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3>Soft shadows: 1 vs 4 vs 16 vs 64 light rays (<kbd>-l</kbd>), 1 sample per pixel (<kbd>-s 1</kbd>), light sampling only.</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3_soft_l1.png" align="middle" width="220px" alt="l=1"/>
+        <figcaption><kbd>-s 1 -l 1</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part3_soft_l4.png" align="middle" width="220px" alt="l=4"/>
+        <figcaption><kbd>-s 1 -l 4</kbd></figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part3_soft_l16.png" align="middle" width="220px" alt="l=16"/>
+        <figcaption><kbd>-s 1 -l 16</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part3_soft_l64.png" align="middle" width="220px" alt="l=64"/>
+        <figcaption><kbd>-s 1 -l 64</kbd></figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>
+  With a single light sample, penumbrae are one binary draw per pixel: shadows look speckled and unstable. Increasing <kbd>-l</kbd> averages more independent positions on the area light, so the estimator variance in the shadow region drops; by 64 samples the soft region should look smooth at 1 spp (though the rest of the image may still be noisy if indirect paths matter). As the number of samples increases, the image converges to a higher and higher resolution image with good shadows.</p>
+<br>
+
+<h3>Uniform hemisphere vs light sampling (one paragraph).</h3>
+<p>
+  Hemisphere sampling probes the whole upper hemisphere with equal probability, so finding a small bright emitter is a rare event; variance is high and shadows and caustic-like direct paths are noisy at equal sample counts. Sampling the light source explicitly generates directions that land on the emitter with probability tied to its solid angle from the shading point, which matches the importance of direct lighting; shadow boundaries converge much faster. Hemisphere sampling remains a useful baseline and is closer to a naive path tracer, but for scenes dominated by a few lights, importance sampling those lights is the practical choice.
+</p>
+<br>
+
+
+<h2 align="middle">Part 4: Global Illumination (25 pts)</h2>
+
+<h3>Walk through your implementation of the indirect lighting function.</h3>
+<p>
+  <kbd>at_least_one_bounce_radiance</kbd> adds direct lighting at the current vertex according to the accumulate flag (see below), then if depth allows, samples the BSDF with <kbd>sample_f</kbd> to get an incoming direction, pdf, and $f_r$. Russian roulette: except when we need at least one extension, with probability $0.35$ we terminate; otherwise we scale surviving paths by $1/(1-0.35)$. We trace the continuation ray and add $f_r \, L_\mathrm{next} \, \cos\theta_i / (\mathrm{pdf} \cdot p_\mathrm{continue})$. Emission at the camera&rsquo;s first hit is added separately as zero-bounce radiance in <kbd>est_radiance_global_illumination</kbd>.
+</p>
+<br>
+
+<h3>Global illumination stills (1024 samples per pixel).</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4_global_CBbunny_1024.png" align="middle" width="420px" alt="global bunny"/>
+        <figcaption><kbd>CBbunny.dae</kbd>, <kbd>-s 1024</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part4_global_CBspheres_1024.png" align="middle" width="420px" alt="global spheres"/>
+        <figcaption><kbd>CBspheres.dae</kbd>, <kbd>-s 1024</kbd></figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3>Direct-only vs indirect-only (1024 spp), one scene.</h3>
+<p>
+  Temporarily edit <kbd>PathTracer::at_least_one_bounce_radiance</kbd>: for <strong>direct only</strong>, return <kbd>one_bounce_radiance</kbd> without BSDF recursion. For <strong>indirect only</strong>, skip <kbd>one_bounce_radiance</kbd> and keep only the recursive BSDF term (keep zero-bounce emission in the outer integrator or not, but be consistent and state what you did).
+</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/bunny_1_1.png" align="middle" width="420px" alt="direct only"/>
+        <figcaption>Direct illumination only</figcaption>
+      </td>
+      <td>
+        <img src="images/CBbunny_16_8.png" align="middle" width="420px" alt="indirect only"/>
+        <figcaption>Indirect illumination only</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>
+  Direct-only shows sharp lighting and black holes where light does not reach in one bounce; indirect-only reveals color bleeding and cavity illumination without primary light visibility on surfaces.
+</p>
+<br>
+
+<h3><kbd>CBbunny.dae</kbd>: single bounce index with <kbd>isAccumBounces=false</kbd> (<kbd>-o 0</kbd>), <kbd>-s 1024</kbd>, <kbd>-m</kbd> = 0 &hellip; 5.</h3>
+<p>
+  With accumulation off, each max depth highlights the contribution attributed to that bounce count. Replace images after you render.
+</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/part4_bunny_m0_noacc.png" width="200px"/><figcaption><kbd>-m 0 -o 0</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_m1_noacc.png" width="200px"/><figcaption><kbd>-m 1 -o 0</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_m2_noacc.png" width="200px"/><figcaption><kbd>-m 2 -o 0</kbd></figcaption></td>
+    </tr>
+    <tr align="center">
+      <td><img src="images/part4_bunny_m3_noacc.png" width="200px"/><figcaption><kbd>-m 3 -o 0</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_m4_noacc.png" width="200px"/><figcaption><kbd>-m 4 -o 0</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_m5_noacc.png" width="200px"/><figcaption><kbd>-m 5 -o 0</kbd></figcaption></td>
+    </tr>
+  </table>
+</div>
+<p>
+  <strong>What to discuss for the 2nd and 3rd bounce:</strong> the second bounce typically begins to show light that has reflected once already (e.g. ground tint on the bunny, softer fill); the third bounce adds another interreflection pass, often visible in concavities and contact regions. Rasterization with only local shading does not capture these multi-bounce paths unless you add bespoke hacks (e.g. baked radiosity); path tracing unifies them in one integrator.
+</p>
+<br>
+
+<h3><kbd>CBbunny.dae</kbd>: accumulated vs unaccumulated bounces, <kbd>-m</kbd> = 0 &hellip; 5, <kbd>-s 1024</kbd>.</h3>
+<p>
+  <strong>Accumulated</strong> (<kbd>-o 1</kbd>): each image shows all contributions up to that max depth. <strong>Unaccumulated</strong> (<kbd>-o 0</kbd>): each image isolates only that bounce slice (as in the previous grid).
+</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center"><th colspan="3">Accumulated (<kbd>-o 1</kbd>)</th></tr>
+    <tr align="center">
+      <td><img src="images/part4_bunny_acc_m0.png" width="200px"/><figcaption><kbd>-m 0 -o 1</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_acc_m1.png" width="200px"/><figcaption><kbd>-m 1 -o 1</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_acc_m2.png" width="200px"/><figcaption><kbd>-m 2 -o 1</kbd></figcaption></td>
+    </tr>
+    <tr align="center">
+      <td><img src="images/part4_bunny_acc_m3.png" width="200px"/><figcaption><kbd>-m 3 -o 1</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_acc_m4.png" width="200px"/><figcaption><kbd>-m 4 -o 1</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_acc_m5.png" width="200px"/><figcaption><kbd>-m 5 -o 1</kbd></figcaption></td>
+    </tr>
+  </table>
+</div>
+<p>
+  Contrast the grids: accumulation builds up the final image monotonically in path length; single-bounce slices explain <em>where</em> each increment of depth adds energy.
+</p>
+<br>
+
+<h3><kbd>CBbunny.dae</kbd>: Russian roulette series, <kbd>-s 1024</kbd>, <kbd>-m</kbd> &isin; {0,1,2,3,4,100}.</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/part4_bunny_rr_m0.png" width="200px"/><figcaption><kbd>-m 0</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_rr_m1.png" width="200px"/><figcaption><kbd>-m 1</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_rr_m2.png" width="200px"/><figcaption><kbd>-m 2</kbd></figcaption></td>
+    </tr>
+    <tr align="center">
+      <td><img src="images/part4_bunny_rr_m3.png" width="200px"/><figcaption><kbd>-m 3</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_rr_m4.png" width="200px"/><figcaption><kbd>-m 4</kbd></figcaption></td>
+      <td><img src="images/part4_bunny_rr_m100.png" width="200px"/><figcaption><kbd>-m 100</kbd> (RR)</figcaption></td>
+    </tr>
+  </table>
+</div>
+<p>
+  Low <kbd>-m</kbd> caps finite bounces; very large <kbd>-m</kbd> relies on Russian roulette for termination so paths can still explore long chains without a hard cutoff bias (aside from implementation details at the first bounce).
+</p>
+<br>
+
+<h3>Sample rate comparison: 1, 2, 4, 8, 16, 64, 1024 spp, <kbd>-l 4</kbd>, one scene.</h3>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/part4_spp_1.png" width="240px"/><figcaption><kbd>-s 1 -l 4</kbd></figcaption></td>
+      <td><img src="images/part4_spp_2.png" width="240px"/><figcaption><kbd>-s 2 -l 4</kbd></figcaption></td>
+    </tr>
+    <tr align="center">
+      <td><img src="images/part4_spp_4.png" width="240px"/><figcaption><kbd>-s 4 -l 4</kbd></figcaption></td>
+      <td><img src="images/part4_spp_8.png" width="240px"/><figcaption><kbd>-s 8 -l 4</kbd></figcaption></td>
+    </tr>
+    <tr align="center">
+      <td><img src="images/part4_spp_16.png" width="240px"/><figcaption><kbd>-s 16 -l 4</kbd></figcaption></td>
+      <td><img src="images/part4_spp_64.png" width="240px"/><figcaption><kbd>-s 64 -l 4</kbd></figcaption></td>
+    </tr>
+    <tr align="center">
+      <td colspan="2"><img src="images/part4_spp_1024.png" width="480px"/><figcaption><kbd>-s 1024 -l 4</kbd></figcaption></td>
+    </tr>
+  </table>
+</div>
+<p>
+  Noise scales roughly with $1/\sqrt{N}$ for naive Monte Carlo; diminishing returns appear as the image approaches convergence.
+</p>
+<br>
+
+
+<h2 align="middle">Part 5: Adaptive Sampling (15 pts)</h2>
+
+<h3>Explain adaptive sampling and your implementation.</h3>
+<p>
+  Adaptive sampling spends more work where the pixel mean is still uncertain. In <kbd>raytrace_pixel</kbd>, samples are taken in batches. After each batch we estimate the mean illuminance and its variance, form an approximate 95% confidence interval half-width $I = 1.96\,\sigma/\sqrt{n}$, and stop early if $I \le \texttt{maxTolerance} \times \text{mean}$ (and $n&gt;1$). The final per-pixel sample count is stored in <kbd>sampleCountBuffer</kbd> for visualization. Parameters <kbd>samplesPerBatch</kbd> and <kbd>maxTolerance</kbd> come from the app config (<kbd>-a</kbd> in headless mode).
+</p>
+<br>
+
+<h3>Two scenes, &ge; 2048 max samples per pixel: final image + sample-count heat map.</h3>
+<p>
+  Use <kbd>-s 2048</kbd> (or higher cap), <kbd>-l 1</kbd>, <kbd>-m 5</kbd> (or more), and enable adaptive settings so the heat map varies visibly. Export the sample-rate debug view from your renderer.
+</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5_render_sceneA.png" align="middle" width="400px" alt="scene A render"/>
+        <figcaption>Scene A &mdash; converged render</figcaption>
+      </td>
+      <td>
+        <img src="images/part5_render_sceneA_rate.png" align="middle" width="400px" alt="scene A samples"/>
+        <figcaption>Scene A &mdash; sample counts</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part5_render_sceneB.png" align="middle" width="400px" alt="scene B render"/>
+        <figcaption>Scene B &mdash; converged render</figcaption>
+      </td>
+      <td>
+        <img src="images/part5_render_sceneB_rate.png" align="middle" width="400px" alt="scene B samples"/>
+        <figcaption>Scene B &mdash; sample counts</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>
+  Comment on where the allocator spends extra samples (soft shadows, glossy highlights, dim regions) and where it stops early (smooth diffuse areas).
+</p>
+<br>
+
+
+<h2 align="middle">Part 6: Extra Credit</h2>
+<p>
+  Below: motion blur, a k-d tree accelerator compared to the BVH, and bilateral denoising on the HDR buffer before tonemapping. Command-line flags and a small reproducible script are in the repository; copy outputs from <kbd>build/</kbd> into <kbd>docs/images/</kbd> (or re-render) to match the paths used here.
+</p>
+
+<h3>Motion blur</h3>
+<p>
+  Each ray carries a shutter time <kbd>time</kbd> $\in [0,1]$ (<kbd>src/pathtracer/ray.h</kbd>). For meshes, vertex positions at the end of the shutter interval live in <kbd>Mesh::positions_end</kbd> (same length as <kbd>positions</kbd>); triangles interpolate linearly between <kbd>positions[i]</kbd> and <kbd>positions_end[i]</kbd> inside M&ouml;ller&ndash;Trumbore (<kbd>src/scene/triangle.cpp</kbd>). Bounding boxes enclose both poses so acceleration remains conservative. Spheres support linear motion of the center via <kbd>SphereObject::set_motion_end_center</kbd>. Secondary rays (direct shadow and indirect bounces) reuse the primary ray&rsquo;s time so the shutter is frozen along a path. Enable per-pixel random times with <kbd>-M</kbd> (see <kbd>src/application/main.cpp</kbd>).
+</p>
+<p>
+  <strong>Demo:</strong> if the environment variable <kbd>CGL_PROOF_MOTION</kbd> is set when the scene loads, the renderer adds a fixed translation to the first mesh&rsquo;s end positions (see <kbd>apply_proof_motion_scene</kbd> in <kbd>src/pathtracer/raytraced_renderer.cpp</kbd>) so <kbd>-M</kbd> produces visible streaking. Reproduce with <kbd>./scripts/run_feature_proof.sh</kbd> or:
+  <kbd>CGL_PROOF_MOTION=1 ./build/pathtracer -M -s 64 -m 2 -f docs/images/part6_motion_blur.png -r 256 256 dae/simple/cube.dae</kbd>
+  and a static baseline without <kbd>-M</kbd> / without the env var for comparison.
+</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part6_motion_blur.png" align="middle" width="380px" alt="motion blur cube"/>
+        <figcaption>Motion blur: <kbd>CGL_PROOF_MOTION=1</kbd>, <kbd>-M</kbd>, <kbd>cube.dae</kbd></figcaption>
+      </td>
+      <td>
+        <img src="images/part6_motion_static.png" align="middle" width="380px" alt="static cube"/>
+        <figcaption>Same scene without motion shutter sampling (no <kbd>-M</kbd>)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3>Alternative acceleration: k-d tree vs BVH</h3>
+<p>
+  We added <kbd>KDTreeAccel</kbd> (<kbd>src/scene/kdtree_accel.cpp</kbd>): median splits on cycling axes over primitive centroids; leaves store index ranges; traversal is recursive with axis-aligned node bounds (disjoint half-spaces, unlike overlapping BVH siblings). <kbd>BVHAccel</kbd> and <kbd>KDTreeAccel</kbd> share a <kbd>RayAccelerator</kbd> base (<kbd>src/scene/ray_accel.h</kbd>) for ray and intersection-test counters. Choose the structure with <kbd>-A bvh</kbd> (default) or <kbd>-A kd</kbd>. BVH node visualization in the GUI still requires a BVH; with a k-d tree, that mode is disabled.
+</p>
+<p>
+  <strong>Measurement:</strong> <kbd>-B</kbd> runs a micro-benchmark after loading the scene: build time for both structures (on copies of the primitive list), then trace the same $250{,}000$ random rays inside the scene bounding box. The console reports trace time, Mrays/s, and average primitive intersection tests per ray. Example output (machine-dependent; re-run locally):
+</p>
+<table class="data">
+  <thead>
+    <tr><th>Scene</th><th>Primitives</th><th>Structure</th><th>Build (s)</th><th>Trace 250k rays (s)</th><th>Tests / ray</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><kbd>dae/simple/cube.dae</kbd></td><td>12</td><td>BVH</td><td>&approx; 0.000</td><td>&approx; 0.08</td><td>&approx; 5.2</td></tr>
+    <tr><td><kbd>dae/simple/cube.dae</kbd></td><td>12</td><td>k-d</td><td>&approx; 0.000</td><td>&approx; 0.07</td><td>&approx; 12.0</td></tr>
+    <tr><td><kbd>dae/meshedit/cow.dae</kbd></td><td>5856</td><td>BVH</td><td>&approx; 0.014</td><td>&approx; 0.89</td><td>&approx; 4.8</td></tr>
+    <tr><td><kbd>dae/meshedit/cow.dae</kbd></td><td>5856</td><td>k-d</td><td>&approx; 0.011</td><td>&approx; 0.55</td><td>&approx; 6.7</td></tr>
+  </tbody>
+</table>
+<p>
+  On these tests the k-d tree sometimes traces faster for random rays (better empty-space skipping) while the BVH tends to use fewer primitive tests per ray. Coherent primary rays in the real renderer can favor either structure; treat the table as one data point, not a universal ranking.
+</p>
+<br>
+
+<h3>Bilateral denoising</h3>
+<p>
+  After accumulating HDR linear radiance in <kbd>sampleBuffer</kbd>, <kbd>HDRImageBuffer::bilateral_denoise</kbd> (<kbd>src/util/image.h</kbd>) applies a spatial Gaussian kernel weighted by luminance similarity, then the usual gamma <kbd>toColor</kbd> path runs for display (<kbd>PathTracer::write_to_framebuffer</kbd>). Enable with <kbd>-N &lt;sigma_range&gt;</kbd>; spatial $\sigma$ and half-window use pathtracer defaults (configurable in code). Example: <kbd>./build/pathtracer -N 0.12 -s 4 -m 2 -f docs/images/part6_bilateral.png -r 256 256 dae/meshedit/cow.dae</kbd>. Compare to the same settings without <kbd>-N</kbd> for <kbd>part6_bilateral_baseline.png</kbd>.
+</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part6_bilateral_baseline.png" align="middle" width="380px" alt="no bilateral"/>
+        <figcaption>Low sample count, no bilateral</figcaption>
+      </td>
+      <td>
+        <img src="images/part6_bilateral.png" align="middle" width="380px" alt="bilateral"/>
+        <figcaption>Same, with <kbd>-N 0.12</kbd></figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>
+  Bilateral filtering reduces high-frequency noise but can smooth fine detail and bright edges; it is a cheap post-pass, not a full Monte Carlo denoiser (OIDN, etc.).
+</p>
+<br>
+
+
+
+</body>
 </html>
