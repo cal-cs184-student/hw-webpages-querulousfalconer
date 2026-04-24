@@ -180,15 +180,15 @@
       <table class="img-grid">
         <tr>
           <td>
-            <img src="images/p3/sphere_ks_500.png" alt="sphere ks 500">
+            <img src="images/p3/ks_500.png" alt="sphere ks 500">
             <figcaption><code>scene/sphere.json</code>, \(k_s=500\).</figcaption>
           </td>
           <td>
-            <img src="images/p3/sphere_ks_5000.png" alt="sphere ks 5000">
+            <img src="images/p3/ks_5000.png" alt="sphere ks 5000">
             <figcaption><code>scene/sphere.json</code>, \(k_s=5000\) (default).</figcaption>
           </td>
           <td>
-            <img src="images/p3/sphere_ks_50000.png" alt="sphere ks 50000">
+            <img src="images/p3/ks_50000.png" alt="sphere ks 50000">
             <figcaption><code>scene/sphere.json</code>, \(k_s=50000\).</figcaption>
           </td>
         </tr>
@@ -307,7 +307,7 @@
       <p>
         Bump mapping perturbs normals in the fragment shader using texture height derivatives and TBN basis, so it changes lighting response without changing mesh silhouette.
         Displacement mapping offsets vertex positions in the vertex shader by normal direction scaled by texture height, so geometry itself changes.
-        For both effects, I use <code>HMPDFT-ChibiMik.png</code> as the shared height texture.
+        For both effects, I intentionally use <code>HMPDFT-ChibiMik.png</code> from the <code>textures/</code> directory (not the default <code>texture_2.png</code>) as the shared height texture.
       </p>
       <table class="img-grid">
         <tr>
@@ -344,8 +344,13 @@
         </tr>
       </table>
       <p>
-        With coarse tessellation, displacement has limited geometric detail because there are fewer vertices to move, while bump still shows shading detail.
-        With fine tessellation, displacement produces much richer geometric relief and silhouette changes.
+        Comparing the two approaches in my renders: bump mapping gives the impression of surface detail through lighting only, so both cloth and sphere keep the same underlying silhouette while still showing visible texture variation.
+        Displacement mapping produces true geometric relief, which is most obvious on the sphere where the outer contour and highlights shift as vertices are physically offset by the height map.
+      </p>
+      <p>
+        The sphere coarseness comparison shows this clearly.
+        At <code>-o 16 -a 16</code>, bump mapping still reacts well because per-fragment normal perturbation does not need many vertices, but displacement appears blockier and less faithful due to sparse geometry.
+        At <code>-o 128 -a 128</code>, displacement becomes much more detailed and natural-looking since many more vertices can move, while bump mapping looks similar in silhouette and primarily changes shading intensity.
       </p>
 
       <h3>Mirror shader</h3>
